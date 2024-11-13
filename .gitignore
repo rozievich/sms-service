@@ -1,0 +1,57 @@
+# Python bytecode files
+*.py[cod]
+__pycache__/
+*.so
+*.pyd
+
+# Django migrations
+*/migrations/*
+!*/migrations/__init__.py
+
+# Logs
+*.log
+*.pot
+*.mo
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+.Python
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Database
+*.sqlite3
+
+# Static and media files
+staticfiles/
+media/
+
+# Local settings (optional)
+local_settings.py
+
+# Environment variables
+.env
+
+# IDE and editor specific
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Pytest cache
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+*.cover
+.cache
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
