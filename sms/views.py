@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveAPIView
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.response import Response
@@ -8,6 +8,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .models import Message
 from .serializers import LoginSerializer, RefreshTokenSerializer, GetProfileSerilizer, MessageModelSerializer
+
 
 # Create your views here.
 class GetSecretKeyAPIView(APIView):
@@ -61,3 +62,9 @@ class SendSMSAPIView(ListCreateAPIView):
     serializer_class = MessageModelSerializer
     permission_classes = (IsAuthenticated, )
 
+
+class SMSRetrieveAPIView(RetrieveAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageModelSerializer
+    permission_classes = (IsAuthenticated, )
+    lookup_field = 'message_id'
