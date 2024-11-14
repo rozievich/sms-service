@@ -115,6 +115,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # SMS CONFIGS
 SMS_API_KEY = os.getenv("SMS_API_KEY")
 SMS_EMAIL = os.getenv("SMS_EMAIL")
+SMS_FROM = '4546'
 
 # Simple JWT Config
 SIMPLE_JWT = {
