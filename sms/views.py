@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from config.settings import SMS_FROM, SMS_EMAIL, SMS_API_KEY
 from .models import Message, CustomUser
-from .serializers import RefreshTokenSerializer, GetProfileSerilizer, MessageModelSerializer, AllSendMessageSerializer, CustomUserModelSerializer
+from .serializers import RefreshTokenSerializer, GetProfileSerilizer, MessageModelSerializer, AllSendMessageSerializer, CustomUserModelSerializer, InternationalSmsSerializer
 
 
 
@@ -183,3 +183,36 @@ class AllSendMessageAPIView(APIView):
             return Response(response.json(), status=response.status_code)
 
         return Response(response.json(), status.HTTP_200_OK)
+
+
+class InternationalSmsAPIView(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "secret_key": openapi.Schema(type=openapi.TYPE_STRING),
+                "message_text": openapi.Schema(type=openapi.TYPE_STRING),
+                "mobile_phone": openapi.Schema(type=openapi.TYPE_STRING),
+                "country_code": openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )
+    )
+
+    def post(self, request, *args, **kwargs):
+        serializer = InternationalSmsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        secret_key = serializer.validated_data['secret_key']
+        message_text = serializer.validated_data['message_text']
+        mobile_phone = serializer.validated_data['mobile_phone']
+        country_code = serializer.validated_data['country_code']
+
+        payload={'mobile_phone': mobile_phone[1:], 'message': message_text, 'country_code': country_code, 'unicode': '0'}
+        headers = {'Authorization': f'Bearer {secret_key}'}
+        response = requests.post("https://notify.eskiz.uz/api/message/sms/send-global", headers=headers, json=payload)
+
+        if response.status_code != 200:
+            return Response({"error": response.json()}, status=response.status_code)
+        return Response(response.json(), status=status.HTTP_201_CREATED)

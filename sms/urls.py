@@ -7,6 +7,7 @@ from .views import (
     SendSMSAPIView,
     SMSRetrieveAPIView,
     AllSendMessageAPIView,
+    InternationalSmsAPIView,
     UserModelViewSet
 )
 
@@ -21,5 +22,6 @@ urlpatterns = [
     path("get-profile/", GetProfileAPIView.as_view(), name="get_profile"),
     path("sms/send/", SendSMSAPIView.as_view(), name="send_sms"),
     path("sms/send/all/", AllSendMessageAPIView.as_view(), name="all_user_send_sms"),
-    path("sms/<str:message_id>/", SMSRetrieveAPIView.as_view(), name="get_sms"),
+    path("sms/send/global/", InternationalSmsAPIView.as_view(), name="send_sms_global"),
+    path("sms/<str:message_id>/", SMSRetrieveAPIView.as_view(), name="get_sms")
 ]

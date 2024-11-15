@@ -60,3 +60,10 @@ class AllSendMessageSerializer(serializers.Serializer):
         if not attrs.get("secret_key") or not attrs.get("message_text"):
             raise ValidationError("Both secret_key and message_text are required.")
         return attrs
+
+
+class InternationalSmsSerializer(serializers.Serializer):
+    secret_key = serializers.CharField(max_length=500, required=True)
+    message_text = serializers.CharField(max_length=255, required=True)
+    mobile_phone = serializers.CharField(max_length=15, required=True)
+    country_code = serializers.CharField(max_length=2, required=True)
