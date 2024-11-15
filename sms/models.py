@@ -16,3 +16,13 @@ class Message(models.Model):
 
     def __str__(self) -> str:
         return self.message_id
+
+
+class GlobalMessage(models.Model):
+    message_text = models.CharField(max_length=255)
+    mobile_phone = models.CharField(max_length=15)
+    country_code = models.CharField(max_length=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.message_text

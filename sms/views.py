@@ -10,9 +10,16 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from config.settings import SMS_FROM, SMS_EMAIL, SMS_API_KEY
-from .models import Message, CustomUser
-from .serializers import RefreshTokenSerializer, GetProfileSerilizer, MessageModelSerializer, AllSendMessageSerializer, CustomUserModelSerializer, InternationalSmsSerializer
-
+from .models import Message, CustomUser, GlobalMessage
+from .serializers import (
+    RefreshTokenSerializer,
+    GetProfileSerilizer,
+    MessageModelSerializer,
+    AllSendMessageSerializer,
+    CustomUserModelSerializer,
+    InternationalSmsSerializer,
+    GetALLMessageSerializer
+)
 
 
 class UserModelViewSet(ModelViewSet):
@@ -204,7 +211,7 @@ class InternationalSmsAPIView(APIView):
         serializer = InternationalSmsSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        secret_key = serializer.validated_data['secret_key']
+        secret_key = serializer.validated_data.pop('secret_key')
         message_text = serializer.validated_data['message_text']
         mobile_phone = serializer.validated_data['mobile_phone']
         country_code = serializer.validated_data['country_code']
@@ -215,4 +222,35 @@ class InternationalSmsAPIView(APIView):
 
         if response.status_code != 200:
             return Response({"error": response.json()}, status=response.status_code)
+
+        serializer.save()
+        return Response(response.json(), status=status.HTTP_201_CREATED)
+
+    def get(self, request, *args, **kwargs):
+        messages = GlobalMessage.objects.all()
+        serializer = InternationalSmsSerializer(messages, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GetALLMessageAPIView(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    def post(self, request, *args, **kwargs):
+        serializer = GetALLMessageSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        secret_key = serializer.validated_data['secret_key']
+        start_date = serializer.validated_data['start_date']
+        end_date = serializer.validated_data['end_date']
+        page_size = serializer.validated_data['page_size']
+
+        payload={'start_date': str(start_date), 'end_date': str(end_date), 'page_size': str(page_size), 'count': '0'}
+        headers = {'Authorization': f'Bearer {secret_key}'}
+
+        response = requests.post("https://notify.eskiz.uz/api/message/sms/get-user-messages", headers=headers, json=payload)
+        print(response.json())
+        if response.status_code != 200:
+            return Response({"error": response.json()}, status=response.status_code)
+
         return Response(response.json(), status=status.HTTP_201_CREATED)
