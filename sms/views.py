@@ -245,11 +245,10 @@ class GetALLMessageAPIView(APIView):
         end_date = serializer.validated_data['end_date']
         page_size = serializer.validated_data['page_size']
 
-        payload={'start_date': str(start_date), 'end_date': str(end_date), 'page_size': str(page_size), 'count': '0'}
+        payload={'start_date': start_date.strftime('%Y-%m-%d %H:%M'), 'end_date': end_date.strftime('%Y-%m-%d %H:%M'), 'page_size': str(page_size), 'count': '0'}
         headers = {'Authorization': f'Bearer {secret_key}'}
 
         response = requests.post("https://notify.eskiz.uz/api/message/sms/get-user-messages", headers=headers, json=payload)
-        print(response.json())
         if response.status_code != 200:
             return Response({"error": response.json()}, status=response.status_code)
 

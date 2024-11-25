@@ -72,29 +72,16 @@ class InternationalSmsSerializer(serializers.ModelSerializer):
 
 class GetALLMessageSerializer(serializers.Serializer):
     secret_key = serializers.CharField(max_length=500, required=True)
-    start_date = serializers.DateTimeField(required=True)
-    end_date = serializers.DateTimeField(required=True)
+    start_date = serializers.DateTimeField(required=True, format="%Y-%m-%d %H:%M", input_formats=['%Y-%m-%d %H:%M'])
+    end_date = serializers.DateTimeField(required=True, format="%Y-%m-%d %H:%M", input_formats=['%Y-%m-%d %H:%M'])
     page_size = serializers.IntegerField(required=True)
 
-    def validate_page_size(value):
-        if not int(value) > 19 and not int(value) < 201:
+    def validate(self, data):
+        if data['start_date'] > data['end_date']:
+            raise ValidationError("Start date cannot be greater than end date.")
+        return data
+    
+    def validate_page_size(self, value):
+        if value < 19 and value > 201:
             raise ValidationError("The value entered in page size must be greater than 20 and less than 200")
-        return value
-
-    def validate_start_date(value):
-        try:
-            datetime.strptime(value, "%Y-%m-%d %H:%M")
-        except ValueError:
-            raise serializers.ValidationError(
-                "The time format is incorrect. Valid format: 'YYYY-MM-DD HH:MM'"
-            )
-        return value
-
-    def validate_end_date(value):
-        try:
-            datetime.strptime(value, "%Y-%m-%d %H:%M")
-        except ValueError:
-            raise serializers.ValidationError(
-                "The time format is incorrect. Valid format: 'YYYY-MM-DD HH:MM'"
-            )
         return value
