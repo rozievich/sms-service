@@ -85,3 +85,41 @@ class GetALLMessageSerializer(serializers.Serializer):
         if value < 19 and value > 201:
             raise ValidationError("The value entered in page size must be greater than 20 and less than 200")
         return value
+
+
+class GetMessageCSVSerializer(serializers.Serializer):
+    secret_key = serializers.CharField(max_length=500, required=True)
+    year = serializers.IntegerField(required=True)
+    month = serializers.IntegerField(required=True)
+    start_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", input_formats=["%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", ""])
+    end_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", input_formats=["%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", ""])
+    status = serializers.CharField(max_length=30, required=True)
+
+    def validate(self, attrs):
+        start_date = attrs.get('start_date', None)
+        end_date = attrs.get('end_date', None)
+        if start_date and end_date:
+            if start_date > end_date and end_date > datetime.now().strftime("%Y:%m:%d %H:%M:%S"):
+                raise ValidationError("Start date cannot be greater than end date.")
+        return attrs
+
+    def validate_secret_key(self, value):
+        if len(value) < 20:
+            raise ValidationError("Both secret_key and message_text are required.")
+        return value
+
+    def validate_year(self, value):
+        now_year = datetime.now().strftime("%Y")
+        if value > int(now_year) and value < 1900:
+            raise ValidationError(f"The Year attribute must be greater than 1900 and less than {now_year}.")
+        return value
+
+    def validate_month(self, value):
+        if value > 12 and value < 1:
+            raise ValidationError("The month attribute must be less than 12 and greater than 0.")
+        return value
+
+    def validate_status(self, value):
+        if value not in ["all", "delivered", "rejected"]:
+            raise ValidationError("This state is not supported. Example: all, submitted, rejected")
+        return value

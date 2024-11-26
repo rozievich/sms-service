@@ -18,7 +18,8 @@ from .serializers import (
     AllSendMessageSerializer,
     CustomUserModelSerializer,
     InternationalSmsSerializer,
-    GetALLMessageSerializer
+    GetALLMessageSerializer,
+    GetMessageCSVSerializer
 )
 
 
@@ -273,3 +274,60 @@ class GetNickMeAPIView(APIView):
                 return Response(response.json(), status=response.status_code, safe=False)
             return Response(response.json(), status=status.HTTP_200_OK)
         return Response({"error": "secret key value not provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetMyBalanceAPIView(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    @swagger_auto_schema(
+            manual_parameters=[
+                openapi.Parameter("secret_key", openapi.IN_QUERY, type=openapi.TYPE_STRING, required=True)
+            ]
+    )
+
+    def get(self, request, *args, **kwargs):
+        secret_key = request.query_params.get("secret_key", None)
+        if not secret_key:
+            return Response({"error": "secret key value not provided."}, status=status.HTTP_400_BAD_REQUEST)
+        headers = {"Authorization": f"Bearer {secret_key}"}
+        response = requests.get("https://notify.eskiz.uz/api/user/get-limit", headers=headers)
+        if response.status_code != 200:
+            return Response(response.json(), status=response.status_code, safe=False)
+        return Response(response.json(), status=status.HTTP_200_OK)
+
+
+class GetMessageCSVAPIView(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties = {
+                "secret_key": openapi.Schema(type=openapi.TYPE_STRING),
+                "year": openapi.Schema(type=openapi.TYPE_INTEGER),
+                "month": openapi.Schema(type=openapi.TYPE_INTEGER),
+                "start_date": openapi.Schema(type=openapi.TYPE_STRING),
+                "end_date": openapi.Schema(type=openapi.TYPE_STRING),
+                "status": openapi.Schema(type=openapi.TYPE_STRING)
+            },
+            required=['secret_key', 'year', 'month', 'start_date', 'end_date', 'status']
+        )
+    )
+
+    def post(self, request, *args, **kwargs):
+        serializer = GetMessageCSVSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        secret_key = serializer.validated_data['secret_key']
+        year = serializer.validated_data['year']
+        month = serializer.validated_data['month']
+        start_date = serializer.validated_data['start_date']
+        end_date = serializer.validated_data['end_date']
+        status_ = serializer.validated_data['status']
+        
+        payload = {"year": year, "month": month, "start": start_date, "end": end_date}
+        headers = {"Authorization": f"Bearer {secret_key}"}
+        response = requests.post(f"https://notify.eskiz.uz/api/message/export?status={status_}", json=payload, headers=headers)
+        if response.status_code != 200:
+            return Response(response.json(), status=response.status_code, safe=False)
+        return Response(response.json(), status=status.HTTP_200_OK)
