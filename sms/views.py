@@ -8,6 +8,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import JSONParser
 
 from config.settings import SMS_FROM, SMS_EMAIL, SMS_API_KEY
 from .models import Message, CustomUser, GlobalMessage
@@ -253,3 +254,23 @@ class GetALLMessageAPIView(APIView):
             return Response({"error": response.json()}, status=response.status_code)
 
         return Response(response.json(), status=status.HTTP_201_CREATED)
+
+
+class GetNickMeAPIView(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('secret_key', openapi.IN_QUERY, type=openapi.TYPE_STRING, required=True)
+        ]
+    )
+
+    def get(self, request, *args, **kwargs):
+        secret_key = request.query_params.get("secret_key", None)
+        if secret_key:
+            headers = {'Authorization': f'Bearer {secret_key}'}
+            response = requests.get("https://notify.eskiz.uz/api/nick/me", headers=headers)
+            if response.status_code != 200:
+                return Response(response.json(), status=response.status_code, safe=False)
+            return Response(response.json(), status=status.HTTP_200_OK)
+        return Response({"error": "secret key value not provided."}, status=status.HTTP_400_BAD_REQUEST)
