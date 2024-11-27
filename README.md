@@ -54,4 +54,4 @@ Pull requestlar va takliflar har doim ochiq! Quyidagi qadamlar orqali hissa qo�
 Ushbu loyiha MIT litsenziyasi asosida taqdim etiladi.
 
 ### 💬 Aloqa
-Savol yoki takliflaringiz bo‘lsa, menga Telegram orqali murojaat qiling: @rozievich
+Savol yoki takliflaringiz bo‘lsa, menga Telegram orqali murojaat qiling: (@rozievich)[https://t.me/rozievich]
