@@ -1,5 +1,7 @@
 import requests
+from io import BytesIO
 from uuid import uuid4
+from django.http import FileResponse
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.views import APIView
@@ -306,11 +308,11 @@ class GetMessageCSVAPIView(APIView):
                 "secret_key": openapi.Schema(type=openapi.TYPE_STRING),
                 "year": openapi.Schema(type=openapi.TYPE_INTEGER),
                 "month": openapi.Schema(type=openapi.TYPE_INTEGER),
-                "start_date": openapi.Schema(type=openapi.TYPE_STRING),
-                "end_date": openapi.Schema(type=openapi.TYPE_STRING),
+                "start_day": openapi.Schema(type=openapi.TYPE_INTEGER),
+                "end_day": openapi.Schema(type=openapi.TYPE_INTEGER),
                 "status": openapi.Schema(type=openapi.TYPE_STRING)
             },
-            required=['secret_key', 'year', 'month', 'start_date', 'end_date', 'status']
+            required=['secret_key', 'year', 'month', 'status']
         )
     )
 
@@ -321,13 +323,16 @@ class GetMessageCSVAPIView(APIView):
         secret_key = serializer.validated_data['secret_key']
         year = serializer.validated_data['year']
         month = serializer.validated_data['month']
-        start_date = serializer.validated_data['start_date']
-        end_date = serializer.validated_data['end_date']
+        start_day = serializer.validated_data.get('start_day')
+        end_day = serializer.validated_data.get('end_day')
         status_ = serializer.validated_data['status']
-        
-        payload = {"year": year, "month": month, "start": start_date, "end": end_date}
+
+        payload = {"year": year, "month": month, "start": f"{year}-{month}-{start_day} 00:00:00" if start_day else "", "end": f"{year}-{month}-{end_day} 00:00:00" if end_day else ""}
         headers = {"Authorization": f"Bearer {secret_key}"}
-        response = requests.post(f"https://notify.eskiz.uz/api/message/export?status={status_}", json=payload, headers=headers)
-        if response.status_code != 200:
-            return Response(response.json(), status=response.status_code, safe=False)
-        return Response(response.json(), status=status.HTTP_200_OK)
+
+        response = requests.post(f"https://notify.eskiz.uz/api/message/export?status={status_}", data=payload, headers=headers)
+        if response.status_code == 200:
+            file_stream = BytesIO(response.content)
+            file_stream.seek(0)
+            return FileResponse(file_stream, as_attachment=True, filename="exported_file.csv", content_type="text/csv")
+        return Response(response.json(), status=response.status_code)
