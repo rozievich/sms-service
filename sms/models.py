@@ -26,3 +26,11 @@ class GlobalMessage(models.Model):
 
     def __str__(self) -> str:
         return self.message_text
+
+
+class SecretKey(models.Model):
+    secret_key = models.CharField(max_length=500)
+    created_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.secret_key
