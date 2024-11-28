@@ -33,7 +33,9 @@ Loyihani ishga tushirishdan oldin quyidagi dasturlar o‘rnatilgan bo‘lishi ke
 4. Django sozlamalarini yangilash:
    settings.py faylida Eskiz API uchun TOKEN va boshqa kerakli sozlamalarni kiriting:
    ```python
-   ESKIZ_API_TOKEN = 'sizning_tokeningiz'
+   ESKIZ_API_KEY = 'sizning api tokeningiz'
+   ESKIZ_EMAIL = 'sizning email manzilingiz'
+   ESKIZ_FROM = 'eskiz taxallusingiz'
    ```
 5. Ma'lumotlar bazasini migratsiya qilish:
    ```bash
