@@ -19,8 +19,8 @@ Loyihani ishga tushirishdan oldin quyidagi dasturlar o‘rnatilgan bo‘lishi ke
 
 1. Loyihani klonlash:  
    ```bash
-   git clone https://github.com/foydalanuvchi/sms-service-api.git
-   cd sms-service-api
+   git clone https://github.com/rozievich/sms-service.git
+   cd sms-service
 2. Virtual muhit yaratish va ishga tushirish:
    ```bash
    python -m venv venv
